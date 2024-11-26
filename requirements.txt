@@ -3,3 +3,4 @@ pennylane==0.39.0
 scikit-learn==1.5.2
 torchvision==0.20.1
 matplotlib==3.9.2
+tqdm==4.67.1

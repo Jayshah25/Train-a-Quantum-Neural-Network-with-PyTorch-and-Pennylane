@@ -5,6 +5,8 @@ from torch.utils.data import DataLoader
 from torch.nn import BCEWithLogitsLoss
 from torch.optim import Adam
 import torch
+import matplotlib.pyplot as plt
+from tqdm import trange
 
 # training setup
 class_1 = 0
@@ -24,7 +26,7 @@ test_dataloader = DataLoader(dataset=test_dataset,batch_size=batch_size)
 
 # initialize the model
 model = BasicQNN(n_qubits=n_components,n_layers=n_layers)
-
+print(model)
 
 optimizer = Adam(model.parameters(), lr=learning_rate)
 criterion = BCEWithLogitsLoss()
@@ -32,7 +34,8 @@ criterion = BCEWithLogitsLoss()
 #training loop
 train_losses = []
 test_accuracies = []
-for epoch in range(epochs):
+progress_bar = trange(epochs)
+for epoch in progress_bar:
     model.train()
     total_loss = 0.0
     for batch_x, batch_y in train_dataloader:
@@ -44,6 +47,9 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
         total_loss+=loss.item()
+
+        progress_bar.set_description("loss: %.5f" % loss.item())
+        progress_bar.refresh() # to show immediately the update
 
     avg_loss = total_loss / len(train_dataloader)
     train_losses.append(avg_loss)
@@ -61,4 +67,23 @@ for epoch in range(epochs):
     
     accuracy = 100 * correct / total
     test_accuracies.append(accuracy)
+
+
+# Plot training results
+plt.figure(figsize=(12, 4))
+
+plt.subplot(1, 2, 1)
+plt.plot(train_losses)
+plt.title('Training Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+
+plt.subplot(1, 2, 2)
+plt.plot(test_accuracies)
+plt.title('Test Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy (%)')
+
+plt.tight_layout()
+plt.show()
     
